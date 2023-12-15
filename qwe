@@ -1,0 +1,128 @@
+import telebot
+from telebot import types
+import openpyxl as op
+import os
+from time import sleep
+
+
+bot = telebot.TeleBot('6922438378:AAF9eKp5tUiUAwQjaqg5Vhq6jpgQaMVZ1A8')
+
+@bot.message_handler(commands=['start'])
+def auth(message):
+    id = open('C:/Users/79128/classes/id.txt', 'r')
+    if str(message.from_user.id) not in str(id.read()):
+        id.close()
+        id = open('C:/Users/79128/classes/id.txt', 'a')
+        id.write(f'{message.from_user.id} \n')
+        id.close()
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+    btn5a = types.KeyboardButton('5 А')
+    btn5b = types.KeyboardButton('5 Б')
+    btn5c = types.KeyboardButton('5 В')
+
+    btn6a = types.KeyboardButton('6 А')
+    btn6b = types.KeyboardButton('6 Б')
+    btn6c = types.KeyboardButton('6 В')
+
+    btn7a = types.KeyboardButton('7 А')
+    btn7b = types.KeyboardButton('7 Б')
+    btn7c = types.KeyboardButton('7 В')
+
+    btn8a = types.KeyboardButton('8 А')
+    btn8b = types.KeyboardButton('8 Б')
+    btn8c = types.KeyboardButton('8 В')
+
+    btn9a = types.KeyboardButton('9 А')
+    btn9b = types.KeyboardButton('9 Б')
+    btn9c = types.KeyboardButton('9 В')
+
+    btn10a = types.KeyboardButton('10 А')
+    btn10b = types.KeyboardButton('10 Б')
+    btn10c = types.KeyboardButton('10 В')
+
+    btn11a = types.KeyboardButton('11 А')
+    btn11b = types.KeyboardButton('11 Б')
+    btn11c = types.KeyboardButton('11 В')
+
+    markup.row(btn5a, btn5b, btn5c)
+    markup.row(btn6a, btn6b, btn6c)
+    markup.row(btn7a, btn7b, btn7c)
+    markup.row(btn8a, btn8b, btn8c)
+    markup.row(btn9a, btn9b, btn9c)
+    markup.row(btn10a, btn10b, btn10c)
+    markup.row(btn11a, btn11b, btn11c)
+
+    bot.send_message(message.chat.id, 'Привет!')
+    msg = bot.send_message(message.chat.id, 'Выбери свой класс', reply_markup=markup)
+
+    bot.register_next_step_handler(msg, auth2)
+
+def auth2(message):
+    global class_
+    global parall
+
+    classes = '5 а, 5 б, 5 в, 6 а, 6 б, 6 в, 7 а, 7 б, 7 в, 8 а, 8 б, 8 в, 9 а, 9 б, 9 в, 10 а, 10 б, 10 в, 11 а, 11 б, 11 в'
+
+    if str(message.text.lower()) not in str(classes):
+        bot.send_message(message.chat.id, 'Неверный класс. Попробуй еще раз')
+        return
+    msg = bot.send_message(message.chat.id, 'А теперь напиши свое имя и фамилию')
+    bot.register_next_step_handler(msg, auth3)
+    parall, class_ = map(str,message.text.lower().split())
+
+
+def auth3(message):
+    global name
+    name = message.text
+
+    if os.path.exists(f'C://Users/79128/classes/{parall}'):
+        if os.path.exists(f'C://Users/79128/classes/{parall}/{class_}'):
+            if not os.path.exists(f'C://Users/79128/classes/{parall}/{class_}/{str(name.lower())} ({message.from_user.id})'):
+                os.mkdir(f'C://Users/79128/classes/{parall}/{class_}/{str(name.lower())} ({message.from_user.id})')
+        else:
+            os.mkdir(f'C://Users/79128/classes/{parall}/{class_}')
+    else:
+        os.mkdir(f'C://Users/79128/classes/{parall}')
+
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+    btn_profile = types.KeyboardButton('👤 Профиль')
+    btn_help = types.KeyboardButton('❓ Помощь')
+    btn_navigation = types.KeyboardButton('🌍 Навигация')
+
+    markup.row(btn_profile)
+    markup.row(btn_help,btn_navigation)
+    bot.send_message(message.chat.id, f'Поздравляем!\nВы успешно вошли, как {name}', reply_markup=markup)
+
+@bot.message_handler(content_types=['text'])
+def hotbar(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn_home = types.KeyboardButton('*тут может быть ваш эмодзи* В меню')
+    markup.row(btn_home)
+
+    if message.text == '👤 Профиль':
+        msg = bot.send_message(message.chat.id, f'Имя: {name}\nКласс: {parall}{class_.upper()}', reply_markup=markup)
+        bot.register_next_step_handler(msg, btn_menu_)
+    elif message.text == '❓ Помощь':
+        msg = bot.send_message(message.chat.id, f'В разработке', reply_markup=markup)
+        bot.register_next_step_handler(msg, btn_menu_)
+    elif message.text == '🌍 Навигация':
+        msg = bot.send_message(message.chat.id, f'В разработке', reply_markup=markup)
+        bot.register_next_step_handler(msg, btn_menu_)
+
+def btn_menu_(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn_profile = types.KeyboardButton('👤 Профиль')
+    btn_help = types.KeyboardButton('❓ Помощь')
+    btn_navigation = types.KeyboardButton('🌍 Навигация')
+    markup.row(btn_profile)
+    markup.row(btn_help, btn_navigation)
+
+    if message.text == '*тут может быть ваш эмодзи* В меню':
+        bot.send_message(message.chat.id, 'Вы вернулись в меню', reply_markup=markup)
+
+
+bot.polling(none_stop=True, interval=0)
