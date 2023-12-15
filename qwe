@@ -5,7 +5,7 @@ import os
 from time import sleep
 
 
-bot = telebot.TeleBot('6922438378:AAF9eKp5tUiUAwQjaqg5Vhq6jpgQaMVZ1A8')
+bot = telebot.TeleBot('token')
 
 @bot.message_handler(commands=['start'])
 def auth(message):
